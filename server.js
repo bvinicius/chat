@@ -1,12 +1,25 @@
 const udp = require('dgram');
 
 const server = udp.createSocket('udp4');
+const clients = {}
 
-console.log(server.ref())
+server.bind(3000, '192.168.0.109', () => {
+    server.addMembership('230.185.192.108')
+});
 
-server.on('message', function (data) {
+function addClient(username, port, address) {
+    clients[username] = { address, port }
+}
+
+server.on('message', function (data, info) {
     const message = data.toString()
-    console.log(` > Cliente diz: ${message}`);
+
+    if (message.indexOf('/register') === 0) {
+        const username = message.split(' ')[1]
+
+        addClient(username, info.port, info.address)
+        server.send(`[server] Successfully registered ${username}.`, info.port, info.address)
+    }
 });
 
 server.on('listening', function () {
@@ -16,13 +29,11 @@ server.on('listening', function () {
     console.log(`IP do servidor: ${address}`);
 });
 
-server.on('close', function () {
-    console.log('Chat encerrado.');
-});
-
 server.on('error', function (error) {
     console.log('Error: ' + error);
     server.close();
 });
 
-server.bind(3000);
+server.on('close', function () {
+    console.log('Chat encerrado.');
+});

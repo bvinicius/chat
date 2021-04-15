@@ -1,18 +1,30 @@
 const udp = require('dgram');
+const readline = require('readline');
 
 const client = udp.createSocket('udp4');
-const data = "bom dia grupo"
 
-client.send(data, 3000, '127.0.0.1', function (error) {
-    if (error) {
-        console.log(error)
-        client.close();
-    } else {
-        console.log('Mensagem enviada ao servidor.\n');
-    }
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
 });
+
+function question(question) {
+    return new Promise((resolve, reject) => {
+        rl.question(question, (answer) => {
+            resolve(answer)
+        })
+    })
+}
+
+(async() => {
+    let answer = ''
+    while(answer != 'quit') {
+        answer = await question('> ')
+        client.send(answer, 3000, '192.168.0.109')
+    }
+})()
 
 client.on('message', function (data, info) {
     const message = data.toString()
-    console.log(` > Servidor diz: ${message}`);
+    console.log(`${message}`);
 });
