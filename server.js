@@ -1,39 +1,61 @@
-const udp = require('dgram');
+const udp = require("dgram");
 
-const server = udp.createSocket('udp4');
-const clients = {}
+var PORT = 41848;
+var MCAST_ADDR = "230.185.192.108"; //not your IP and should be a Class D address, see http://www.iana.org/assignments/multicast-addresses/multicast-addresses.xhtml
 
-server.bind(3000, '192.168.0.109', () => {
-    server.addMembership('230.185.192.108')
+const server = udp.createSocket("udp4");
+const clients = {};
+
+server.bind(PORT, function() {
+    server.setBroadcast(true);
+    server.setMulticastTTL(128);
+    server.addMembership(MCAST_ADDR);
 });
 
 function addClient(username, port, address) {
-    clients[username] = { address, port }
+  clients[username] = { address, port };
 }
 
-server.on('message', function (data, info) {
-    const message = data.toString()
+server.on("message", function(data, info) {
+  const message = data.toString().trim();
 
-    if (message.indexOf('/register') === 0) {
-        const username = message.split(' ')[1]
+  if (message.indexOf("/register") === 0) {
+    // register command
+    const username = message.split(" ")[1];
 
-        addClient(username, info.port, info.address)
-        server.send(`[server] Successfully registered ${username}.`, info.port, info.address)
-    }
+    addClient(username, info.port, info.address);
+    server.send(
+      `[server] Successfully registered ${username}.`,
+      info.port,
+      info.address
+    );
+  } else if (message.indexOf("/dm") === 0) {
+    // direct message to specific user
+    const data = message.split(" ");
+    const destinationUser = data[1];
+    const msg = data[2] || "[empty message]";
+
+    const destinationClient = clients[destinationUser];
+    server.send(msg, destinationClient.port, destinationClient.address);
+  } else {
+    // group message
+    server.send(message, PORT, MCAST_ADDR);
+    console.log(`sent: ${message}`)
+  }
 });
 
-server.on('listening', function () {
-    const { port, address } = server.address();
+server.on("listening", function() {
+  const { port, address } = server.address();
 
-    console.log(`Servidor escutando na porta ${port}`);
-    console.log(`IP do servidor: ${address}`);
+  console.log(`Servidor escutando na porta ${port}`);
+  console.log(`IP do servidor: ${address}`);
 });
 
-server.on('error', function (error) {
-    console.log('Error: ' + error);
-    server.close();
+server.on("error", function(error) {
+  console.log("Error: " + error);
+  server.close();
 });
 
-server.on('close', function () {
-    console.log('Chat encerrado.');
+server.on("close", function() {
+  console.log("Chat encerrado.");
 });
