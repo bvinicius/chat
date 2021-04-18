@@ -2,7 +2,7 @@ const udp = require('dgram');
 const readline = require('readline');
 
 const client = udp.createSocket('udp4');
-const multicastAddress = "230.1.2.3";
+const multicastAddress = "230.185.192.108";
 const multicastInterface = "127.0.0.1"
 const multicastPort = 5554;
 
@@ -27,7 +27,7 @@ function question(question) {
     let answer = ''
     while(answer != 'quit') {
         answer = await question('> ')
-        client.send(answer, 5554, multicastAddress)
+        client.send(answer, 41848, multicastAddress)
     }
 })()
 

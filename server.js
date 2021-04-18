@@ -2,6 +2,7 @@ const udp = require("dgram");
 
 var PORT = 41848;
 var MCAST_ADDR = "230.185.192.108"; //not your IP and should be a Class D address, see http://www.iana.org/assignments/multicast-addresses/multicast-addresses.xhtml
+const multicastPort = 5554;
 
 const server = udp.createSocket("udp4");
 const clients = {};
@@ -13,6 +14,8 @@ server.bind(PORT, function() {
 });
 
 function addClient(username, port, address) {
+  console.log("Adress: ", address)
+  console.log("Port: ", port)
   clients[username] = { address, port };
 }
 
@@ -33,14 +36,19 @@ server.on("message", function(data, info) {
     // direct message to specific user
     const data = message.split(" ");
     const destinationUser = data[1];
-    const msg = data[2] || "[empty message]";
+    const msg = data.slice(2).join(" ") || "[empty message]";
 
     const destinationClient = clients[destinationUser];
     server.send(msg, destinationClient.port, destinationClient.address);
   } else {
-    // group message
-    server.send(message, PORT, MCAST_ADDR);
-    console.log(`sent: ${message}`)
+
+    //VALIDAR O FOR
+    Object.values(clients)
+      .filter(destinationClient => destinationClient.port != info.port)
+      .forEach(destinationClient => {
+      server.send(message, destinationClient.port, destinationClient.address);
+    });
+
   }
 });
 
