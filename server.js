@@ -1,22 +1,26 @@
 const udp = require("dgram");
+const { disconnect } = require("process");
 
 var PORT = 41848;
-var MCAST_ADDR = "230.185.192.108"; //not your IP and should be a Class D address, see http://www.iana.org/assignments/multicast-addresses/multicast-addresses.xhtml
-const multicastPort = 5554;
+// var MCAST_ADDR = "230.185.192.108"; //not your IP and should be a Class D address, see http://www.iana.org/assignments/multicast-addresses/multicast-addresses.xhtml
+// const multicastPort = 5554;
 
 const server = udp.createSocket("udp4");
 const clients = {};
 
 server.bind(PORT, function() {
-    server.setBroadcast(true);
-    server.setMulticastTTL(128);
-    server.addMembership(MCAST_ADDR);
+    checkUpdates()
+    // server.setBroadcast(true);
+    // server.setMulticastTTL(128);
+    // server.addMembership(MCAST_ADDR);
 });
 
 function addClient(username, port, address) {
+  //NÃO PERMITIR USERNAME REPETIDO
   console.log("Adress: ", address)
   console.log("Port: ", port)
-  clients[username] = { address, port };
+  const lastUpdate = process.hrtime();
+  clients[port] = { address, port, username, lastUpdate };
 }
 
 server.on("message", function(data, info) {
@@ -38,11 +42,14 @@ server.on("message", function(data, info) {
     const destinationUser = data[1];
     const msg = data.slice(2).join(" ") || "[empty message]";
 
-    const destinationClient = clients[destinationUser];
-    server.send(msg, destinationClient.port, destinationClient.address);
+    const destinationClient = Object.values(clients).filter(client => client.username == destinationUser)[0]
+
+    server.send(destinationClient.username + ": " + msg, destinationClient.port, destinationClient.address);
+  
+  } else if(message == "[KA]"){
+    clients[info.port].lastUpdate = process.hrtime()
   } else {
 
-    //VALIDAR O FOR
     Object.values(clients)
       .filter(destinationClient => destinationClient.port != info.port)
       .forEach(destinationClient => {
@@ -51,6 +58,21 @@ server.on("message", function(data, info) {
 
   }
 });
+
+function checkUpdates(){
+  setInterval(() => {
+
+    Object.values(clients)
+    .forEach((client, idx) =>{
+      const duration = process.hrtime(client.lastUpdate)
+      if(duration[0] > 20){
+        server.send("Você foi desconectado por inatividade", client.port, client.address);
+        console.log(`${username} foi desconectado. Não recebemos [KA]`)
+        delete clients[client.port]
+      }
+    })
+  }, 1000)
+}
 
 server.on("listening", function() {
   const { port, address } = server.address();

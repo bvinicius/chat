@@ -2,12 +2,11 @@ const udp = require('dgram');
 const readline = require('readline');
 
 const client = udp.createSocket('udp4');
-const multicastAddress = "230.185.192.108";
-const multicastInterface = "127.0.0.1"
-const multicastPort = 5554;
+const SERVER_PORT = 41848;
+const SERVER_ADDRESS = "127.0.0.1"
 
-client.bind(multicastPort, multicastAddress, () => {
-    client.addMembership(multicastAddress, multicastInterface)
+client.bind( () => {
+    keepAlive()
 })
 
 const rl = readline.createInterface({
@@ -23,11 +22,18 @@ function question(question) {
     })
 }
 
+function keepAlive(){
+    setInterval(() =>{
+        client.send("[KA]", SERVER_PORT, SERVER_ADDRESS)
+    }, 10000)
+}
+
+
 (async() => {
     let answer = ''
     while(answer != 'quit') {
         answer = await question('> ')
-        client.send(answer, 41848, multicastAddress)
+        client.send(answer, SERVER_PORT, SERVER_ADDRESS);
     }
 })()
 
