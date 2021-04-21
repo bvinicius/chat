@@ -5,18 +5,6 @@ module.exports = class Group {
         this.name = name;
     }
 
-    // get clients() {
-    //     return this.clients;
-    // }
-
-    // get name() {
-    //     return this.name;
-    // }
-
-    // set name(name) {
-    //     this.name = name;
-    // }
-
     addClient(username, port, address) {
         const activeClients = Object.values(this.clients)
         if (!activeClients.includes(username)) {
