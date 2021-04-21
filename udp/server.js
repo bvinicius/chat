@@ -53,7 +53,7 @@ server.on("message", function (data, info) {
 
 function registerClient(username, port, address) {
     rootGroup.addClient(username, port, address);
-    server.send(`Usuário registrado: ${username}`, port, address);
+    server.send(`[registered]`, port, address);
 }
 
 function directMessage(originPort, destinationUsername, message) {
@@ -115,6 +115,7 @@ function joinGroup(clientPort, groupName) {
 function checkUpdates() {
     setInterval(() => {
         const now = new Date().getTime()
+        console.log(rootGroup.clients)
         Object.values(rootGroup.clients).forEach((client) => {
             const duration = now - client.lastUpdate
             if (duration > 20000) {
