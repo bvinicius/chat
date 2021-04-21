@@ -5,7 +5,6 @@ const SERVER_PORT = 41234;
 const SERVER_ADDRESS = "192.168.0.255"
 
 const client = udp.createSocket('udp4');
-keepAlive()
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -37,5 +36,10 @@ function keepAlive(){
 
 client.on('message', function (data, info) {
     const message = data.toString()
-    console.log(`${message}`);
+
+    if (message == '[registered]') {
+        keepAlive()
+    } else {
+        console.log(`${message}`);
+    }
 });
