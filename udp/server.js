@@ -38,10 +38,10 @@ server.on("message", function (data, info) {
 
         const commands = {
             register: () => registerClient(args[0], info.port, info.address),
-            dm: () => directMessage(info.port, args[0], args[1]),
+            dm: () => directMessage(info.port, args[0], args.slice(1).join(" ")),
             ka: () => keepAlive(info.port),
             'create-group': () => createGroup(info.port, args[0]),
-            group: () => groupMessage(info.port, args[0], args[1]),
+            group: () => groupMessage(info.port, args[0], args.slice(1).join(" ")),
             join: () => joinGroup(info.port, args[0])
         };
         commands[command]();
@@ -60,7 +60,8 @@ function directMessage(originPort, destinationUsername, message) {
     const originClient = clients[originPort];
     const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
 
-    const fullMessage = `${originClient.username}: ${message}`;
+    const fullMessage = `${originClient.username} [Privado]: ${message}`;
+    //const obj = {text: fullMessage, color: "\x1b[32m"}
     server.send(fullMessage, destinationClient.port, destinationClient.address);
 }
 
@@ -70,7 +71,7 @@ function keepAlive(clientPort) {
 
 function messageAll(originPort, message) {
     const client = rootGroup.clients[originPort];
-    const fullMessage = `${client.username}: ${message}`;
+    const fullMessage = `${client.username} [Geral]: ${message}`;
 
     Object.values(rootGroup.clients)
         .filter(client => client.port != originPort)
@@ -93,7 +94,7 @@ function createGroup(clientPort, groupName) {
 function groupMessage(originPort, groupName, message) {
     const group = groupManager.getGroupByName(groupName)
     const client = rootGroup.clients[originPort];
-    const fullMessage = `${client.username}: ${message}`;
+    const fullMessage = `${client.username} [${groupName}]: ${message}`;
 
     Object.values(group.clients)
         .filter(client => client.port != originPort)
@@ -105,7 +106,7 @@ function groupMessage(originPort, groupName, message) {
 function joinGroup(clientPort, groupName) {
     const group = groupManager.getGroupByName(groupName)
     if (group) {
-        const client = rootGroup[clientPort]
+        const client = rootGroup.clients[clientPort]
         group.addClient(client.username, client.port, client.address)
         server.send(`You joined the group ${group.name}.`, client.port, client.address)
     }
