@@ -1,9 +1,21 @@
-class Group {
-    clients = {};
-
-    get clients() {
-        return this.clients;
+module.exports = class Group {
+    
+    constructor(name, clients) {
+        this.clients = clients;
+        this.name = name;
     }
+
+    // get clients() {
+    //     return this.clients;
+    // }
+
+    // get name() {
+    //     return this.name;
+    // }
+
+    // set name(name) {
+    //     this.name = name;
+    // }
 
     addClient(username, port, address) {
         const activeClients = Object.values(this.clients)
@@ -26,5 +38,3 @@ class Group {
         this.clients[port].lastUpdate = new Date().getTime();
     }
 }
-
-module.exports = Group

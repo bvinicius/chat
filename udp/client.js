@@ -5,7 +5,7 @@ const client = udp.createSocket('udp4');
 const SERVER_PORT = 41848;
 const SERVER_ADDRESS = "127.0.0.1"
 
-client.bind( () => {
+client.bind(() => {
     keepAlive()
 })
 
