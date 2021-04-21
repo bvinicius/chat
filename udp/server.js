@@ -8,6 +8,7 @@ const groupManager = new GroupManager();
 
 const rootGroup = new Group('root', {});
 
+server.setBroadcast(true)
 server.bind(PORT, () => {
     console.log(`server bound at ${PORT}`)
     // checkUpdates();
