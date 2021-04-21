@@ -8,10 +8,9 @@ const groupManager = new GroupManager();
 
 const rootGroup = new Group('root', {});
 
-server.setBroadcast(true)
 server.bind(PORT, () => {
-    console.log(`server bound at ${PORT}`)
-    // checkUpdates();
+    server.setBroadcast(true)
+    checkUpdates();
 });
 
 server.on("listening", function () {
@@ -63,7 +62,6 @@ function directMessage(originPort, destinationUsername, message) {
     const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
 
     const fullMessage = `${originClient.username} [Privado]: ${message}`;
-    //const obj = {text: fullMessage, color: "\x1b[32m"}
     server.send(fullMessage, destinationClient.port, destinationClient.address);
 }
 
