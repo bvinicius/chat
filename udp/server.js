@@ -2,14 +2,15 @@ const udp = require("dgram");
 const Group = require("../group/Group");
 const GroupManager = require('../group/GroupManager');
 
-const PORT = 41848;
+const PORT = 41234;
 const server = udp.createSocket("udp4");
 const groupManager = new GroupManager();
 
 const rootGroup = new Group('root', {});
 
 server.bind(PORT, () => {
-    checkUpdates();
+    console.log(`server bound at ${PORT}`)
+    // checkUpdates();
 });
 
 server.on("listening", function () {

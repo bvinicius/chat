@@ -1,13 +1,18 @@
 const udp = require('dgram');
 const readline = require('readline');
 
-const client = udp.createSocket('udp4');
-const SERVER_PORT = 41848;
-const SERVER_ADDRESS = "127.0.0.1"
+const SERVER_PORT = 41234;
+const SERVER_ADDRESS = "192.168.0.255"
 
-client.bind(() => {
-    keepAlive()
-})
+const client = udp.createSocket('udp4');
+client.setBroadcast(true)
+
+const message = 'teste'
+client.send(message, 0, message.length, SERVER_ADDRESS)
+
+// client.bind(() => {
+//     console.log(`client bound at ${SERVER_PORT}`)
+// })
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -31,10 +36,10 @@ function keepAlive(){
 
 (async() => {
     let answer = ''
-    while(answer != 'quit') {
-        answer = await question('> ')
-        client.send(answer, SERVER_PORT, SERVER_ADDRESS);
-    }
+    // while(answer != 'quit') {
+        // answer = await question('> ')
+        // client.send(answer, SERVER_PORT, SERVER_ADDRESS);
+    // }
 })()
 
 client.on('message', function (data, info) {
