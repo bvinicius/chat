@@ -70,6 +70,7 @@ function keepAlive(clientPort) {
 }
 
 function messageAll(originPort, message) {
+    console.log(rootGroup.clients)
     const client = rootGroup.clients[originPort];
     const fullMessage = `${client.username} [Geral]: ${message}`;
 
@@ -93,6 +94,7 @@ function createGroup(clientPort, groupName) {
 
 function groupMessage(originPort, groupName, message) {
     const group = groupManager.getGroupByName(groupName)
+    console.log(rootGroup.clients)
     const client = rootGroup.clients[originPort];
     const fullMessage = `${client.username} [${groupName}]: ${message}`;
 

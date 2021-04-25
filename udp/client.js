@@ -31,10 +31,11 @@ function keepAlive(){
     while(answer != 'quit') {
         answer = await question('> ')
         client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
+        console.log(`sent '${answer}' to ${SERVER_ADDRESS}:${SERVER_PORT}`)
     }
 })()
 
-client.on('message', function (data, info) {
+client.on('message', function (data) {
     const message = data.toString()
 
     if (message == '[registered]') {
