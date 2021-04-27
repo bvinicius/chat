@@ -2,7 +2,7 @@ const udp = require('dgram');
 const readline = require('readline');
 
 const SERVER_PORT = 41234;
-const SERVER_ADDRESS = "127.0.0.1" //para adotar o broadcast, basta alterar o endereço para o endereço de broadcast da rede na qual o server estará.
+const SERVER_ADDRESS = "192.168.0.255" //para adotar o broadcast, basta alterar o endereço para o endereço de broadcast da rede na qual o server estará.
 
 const client = udp.createSocket('udp4');
 const rl = readline.createInterface({
