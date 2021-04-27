@@ -1,6 +1,7 @@
 const udp = require("dgram");
 const Group = require("../group/Group");
 const GroupManager = require('../group/GroupManager');
+const fs = require('fs');
 
 const PORT = 41234;
 const server = udp.createSocket("udp4");
@@ -30,7 +31,12 @@ server.on("close", function () {
 });
 
 server.on("message", function (data, info) {
+    console.log('data: ', data)
     const message = data.toString().trim();
+    const objMessage = JSON.parse(message)
+
+    const imgFromClient = objMessage.data
+    fs.writeFileSync('../../fromClient.jpg', new Uint8Array(imgFromClient.data))
 
     const isCommand = message.indexOf("/") === 0;
     if (isCommand) {
@@ -43,11 +49,12 @@ server.on("message", function (data, info) {
             ka: () => keepAlive(info.port),
             'create-group': () => createGroup(info.port, args[0]),
             group: () => groupMessage(info.port, args[0], args.slice(1).join(" ")),
-            join: () => joinGroup(info.port, args[0])
+            join: () => joinGroup(info.port, args[0]),
+            // img: () => sendImage(args[0], args[1])
         };
         commands[command]();
     } else {
-        messageAll(info.port, message)
+        // messageAll(info.port, message)
     }
 });
 
@@ -78,6 +85,14 @@ function messageAll(originPort, message) {
         .forEach(client => {
             server.send(fullMessage, client.port, client.address);
         })
+}
+
+function sendImage(destinationUsername, buffer) {
+    const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
+}
+
+function toArrayBuffer(buffer) {
+    return new Uint8Array(buffer)
 }
 
 function createGroup(clientPort, groupName) {

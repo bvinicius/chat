@@ -1,8 +1,9 @@
 const udp = require('dgram');
 const readline = require('readline');
+const fs = require('fs');
 
 const SERVER_PORT = 41234;
-const SERVER_ADDRESS = "192.168.0.255" //para adotar o broadcast, basta alterar o endereço para o endereço de broadcast da rede na qual o server estará.
+const SERVER_ADDRESS = "127.0.0.1" //para adotar o broadcast, basta alterar o endereço para o endereço de broadcast da rede na qual o server estará.
 
 const client = udp.createSocket('udp4');
 const rl = readline.createInterface({
@@ -30,8 +31,23 @@ function keepAlive(){
     let answer = ''
     while(answer != 'quit') {
         answer = await question('> ')
-        client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
-        console.log(`sent '${answer}' to ${SERVER_ADDRESS}:${SERVER_PORT}`)
+
+        if (answer == 'img') {
+            const imageBuffer = fs.readFileSync('../../img/zap.jpg')
+            const obj = {
+                data: imageBuffer,
+                destinationClient: 'lucas'
+            }
+
+            const objBuffer = Buffer.from(JSON.stringify(obj))
+            console.log(objBuffer)
+
+            client.send(objBuffer, 0, objBuffer.length, SERVER_PORT, SERVER_ADDRESS)
+            
+        } else {
+            client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
+            console.log(`sent '${answer}' to ${SERVER_ADDRESS}:${SERVER_PORT}`)
+        }
     }
 })()
 
