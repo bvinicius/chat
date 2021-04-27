@@ -70,7 +70,6 @@ function keepAlive(clientPort) {
 }
 
 function messageAll(originPort, message) {
-    console.log(rootGroup.clients)
     const client = rootGroup.clients[originPort];
     const fullMessage = `${client.username} [Geral]: ${message}`;
 
@@ -94,7 +93,6 @@ function createGroup(clientPort, groupName) {
 
 function groupMessage(originPort, groupName, message) {
     const group = groupManager.getGroupByName(groupName)
-    console.log(rootGroup.clients)
     const client = rootGroup.clients[originPort];
     const fullMessage = `${client.username} [${groupName}]: ${message}`;
 
@@ -117,7 +115,6 @@ function joinGroup(clientPort, groupName) {
 function checkUpdates() {
     setInterval(() => {
         const now = new Date().getTime()
-        console.log(rootGroup.clients)
         Object.values(rootGroup.clients).forEach((client) => {
             const duration = now - client.lastUpdate
             if (duration > 20000) {
