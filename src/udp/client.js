@@ -26,6 +26,10 @@ function keepAlive(){
     }, 10000)
 }
 
+function createDir(dirName){
+    fs.mkdirSync("../../" + dirName)
+}
+
 
 (async() => {
     let answer = ''
@@ -54,8 +58,9 @@ function keepAlive(){
 client.on('message', function (data) {
     const message = data.toString()
 
-    if (message == '[registered]') {
+    if (message.split(" ")[0] == '[registered]') {
         keepAlive()
+        createDir(message.split(" ")[1])
     } else {
         console.log(`${message}`);
     }

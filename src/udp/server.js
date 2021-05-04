@@ -33,10 +33,6 @@ server.on("close", function () {
 server.on("message", function (data, info) {
     console.log('data: ', data)
     const message = data.toString().trim();
-    const objMessage = JSON.parse(message)
-
-    const imgFromClient = objMessage.data
-    fs.writeFileSync('../../fromClient.jpg', new Uint8Array(imgFromClient.data))
 
     const isCommand = message.indexOf("/") === 0;
     if (isCommand) {
@@ -50,17 +46,19 @@ server.on("message", function (data, info) {
             'create-group': () => createGroup(info.port, args[0]),
             group: () => groupMessage(info.port, args[0], args.slice(1).join(" ")),
             join: () => joinGroup(info.port, args[0]),
-            // img: () => sendImage(args[0], args[1])
+            img: () => {
+                sendImage(args[0], args[1])
+            }
         };
         commands[command]();
     } else {
-        // messageAll(info.port, message)
+        messageAll(info.port, message)
     }
 });
 
 function registerClient(username, port, address) {
     rootGroup.addClient(username, port, address);
-    server.send(`[registered]`, port, address);
+    server.send(`[registered] ${username}`, port, address);
 }
 
 function directMessage(originPort, destinationUsername, message) {
@@ -88,7 +86,10 @@ function messageAll(originPort, message) {
 }
 
 function sendImage(destinationUsername, buffer) {
-    const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
+    const objMessage = JSON.parse(buffer)
+    const imgFromClient = objMessage.data
+    fs.writeFileSync(`../../${destinationUsername}`, new Uint8Array(imgFromClient.data))
+    //const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
 }
 
 function toArrayBuffer(buffer) {
