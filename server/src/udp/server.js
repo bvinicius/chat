@@ -1,6 +1,6 @@
 const udp = require("dgram");
-const Group = require("../group/Group");
-const GroupManager = require('../group/GroupManager');
+const Group = require("../Group");
+const GroupManager = require('../GroupManager');
 const fs = require('fs');
 
 const PORT = 41234;
@@ -46,9 +46,7 @@ server.on("message", function (data, info) {
             'create-group': () => createGroup(info.port, args[0]),
             group: () => groupMessage(info.port, args[0], args.slice(1).join(" ")),
             join: () => joinGroup(info.port, args[0]),
-            img: () => {
-                sendImage(args[0], args[1])
-            }
+            img: () => sendImage(args[0], args[1])
         };
         commands[command]();
     } else {

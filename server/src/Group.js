@@ -1,4 +1,4 @@
-module.exports = class Group {
+class Group {
     
     constructor(name, clients) {
         this.clients = clients;
@@ -26,3 +26,5 @@ module.exports = class Group {
         this.clients[port].lastUpdate = new Date().getTime();
     }
 }
+
+module.exports = Group

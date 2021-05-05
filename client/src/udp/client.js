@@ -50,7 +50,6 @@ function createDir(dirName){
             
         } else {
             client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
-            console.log(`sent '${answer}' to ${SERVER_ADDRESS}:${SERVER_PORT}`)
         }
     }
 })()

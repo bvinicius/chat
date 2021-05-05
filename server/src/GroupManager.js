@@ -1,5 +1,3 @@
-const Group = require('./Group').default;
-
 class GroupManager {
     groups = [];
 
