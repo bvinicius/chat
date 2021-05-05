@@ -26,8 +26,8 @@ function keepAlive(){
     }, 10000)
 }
 
-function createDir(dirName){
-    fs.mkdirSync("../../" + dirName)
+function createUserDir(dirName){
+    fs.mkdirSync("../../data/" + dirName)
 }
 
 
@@ -59,7 +59,7 @@ client.on('message', function (data) {
 
     if (message.split(" ")[0] == '[registered]') {
         keepAlive()
-        createDir(message.split(" ")[1])
+        createUserDir(message.split(" ")[1])
     } else {
         console.log(`${message}`);
     }
