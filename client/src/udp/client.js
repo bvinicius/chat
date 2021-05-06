@@ -27,40 +27,62 @@ function keepAlive(){
 }
 
 function createUserDir(dirName){
+    try {
+        fs.mkdirSync("../../data")
+    } catch(err) {}
+
     fs.mkdirSync("../../data/" + dirName)
 }
-
 
 (async() => {
     let answer = ''
     while(answer != 'quit') {
         answer = await question('> ')
 
-        if (answer == 'img') {
-            const imageBuffer = fs.readFileSync('../../img/zap.jpg')
-            const obj = {
-                data: imageBuffer,
-                destinationClient: 'lucas'
-            }
-
-            const objBuffer = Buffer.from(JSON.stringify(obj))
-            console.log(objBuffer)
-
-            client.send(objBuffer, 0, objBuffer.length, SERVER_PORT, SERVER_ADDRESS)
-            
+        const isImgSend = answer.indexOf('/img') === 0
+        if (isImgSend) {
+            const [destination, imgPath] = answer.split(' ').slice(1)
+            sendImage(destination, imgPath)
         } else {
             client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
         }
     }
 })()
 
+function sendImage(destination, imgPath) {
+    const imageBuffer = fs.readFileSync(imgPath)
+    const arrSend = [imageBuffer, destination]
+
+    console.log(arrSend.destination)
+    const strSend = JSON.stringify(arrSend)
+    client.send(`/img ${strSend}`, 0, strSend.length, SERVER_PORT, SERVER_ADDRESS)
+}
+
 client.on('message', function (data) {
     const message = data.toString()
 
-    if (message.split(" ")[0] == '[registered]') {
-        keepAlive()
-        createUserDir(message.split(" ")[1])
+    const infoRegex = /\[\w*\]/
+
+    const initialWord = message.split(' ')[0]
+    const isInfo = infoRegex.test(initialWord)
+
+    if (isInfo) {
+        const infos = {
+            '[registered]': () => onRegister(message),
+            '[img]': () => onImgReceive(data)
+        }
+        infos[initialWord]()
     } else {
         console.log(`${message}`);
     }
 });
+
+function onImgReceive(strData) {
+    const objData = JSON.parse(strData)
+    console.log(objData)
+}
+
+function onRegister(message) {
+    keepAlive()
+    createUserDir(message.split(" ")[1])
+}

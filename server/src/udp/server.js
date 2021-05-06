@@ -32,26 +32,24 @@ server.on("close", function () {
 
 server.on("message", function (data, info) {
     console.log('data: ', data)
-    const message = data.toString().trim();
+    const message = data.toString();
 
-    const isCommand = message.indexOf("/") === 0;
-    if (isCommand) {
-        const command = message.split(" ")[0].slice(1);
-        const args = message.split(" ").slice(1);
+    const command = message.split(" ")[0].slice(1);
+    const args = message.split(" ").slice(1);
 
-        const commands = {
-            register: () => registerClient(args[0], info.port, info.address),
-            dm: () => directMessage(info.port, args[0], args.slice(1).join(" ")),
-            ka: () => keepAlive(info.port),
-            'create-group': () => createGroup(info.port, args[0]),
-            group: () => groupMessage(info.port, args[0], args.slice(1).join(" ")),
-            join: () => joinGroup(info.port, args[0]),
-            img: () => sendImage(args[0], args[1])
-        };
-        commands[command]();
-    } else {
-        messageAll(info.port, message)
-    }
+    const commands = {
+        register: () => registerClient(args[0], info.port, info.address),
+        msg: () => sendMessage(info.port, args[0], args.slice(1).join(" ")),
+        group: () => createGroup(info.port, args[0]),
+        join: () => joinGroup(info.port, args[0]),
+        img: () => sendImage(info.port, args[0]),
+        ka: () => keepAlive(info.port)
+    };
+
+    const isKnownCommand = Object.keys(commands).includes(command)
+    isKnownCommand ?
+        commands[command]() :
+        server.send(`${command}: command not found.`, info.port, info.address)
 });
 
 function registerClient(username, port, address) {
@@ -64,12 +62,33 @@ function directMessage(originPort, destinationUsername, message) {
     const originClient = clients[originPort];
     const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
 
-    const fullMessage = `${originClient.username} [Privado]: ${message}`;
+    let fullMessage = ''
+    try {
+        JSON.parse(message)
+        fullMessage = message
+    } catch {
+        console.log('CAIU NO CATCH')
+        fullMessage = `${originClient.username} [Privado]: ${message}`;
+    }
+
+    console.log('CONTINUOU')
+        // const fullMessage = `${originClient.username} [Privado]: ${message}`;
     server.send(fullMessage, destinationClient.port, destinationClient.address);
 }
 
 function keepAlive(clientPort) {
     rootGroup.keepAlive(clientPort);
+}
+
+function sendMessage(originPort, destination, message) {
+    const msgType = destination.charAt(0)
+
+    const msgTypes = {
+        '@': () => directMessage(originPort, destination.slice(1), message),
+        '$': () => groupMessage(originPort, destination.slice(1), message),
+        '*': () => messageAll(originPort, message)
+    }
+    msgTypes[msgType]()
 }
 
 function messageAll(originPort, message) {
@@ -83,15 +102,27 @@ function messageAll(originPort, message) {
         })
 }
 
-function sendImage(destinationUsername, buffer) {
-    const objMessage = JSON.parse(buffer)
+function sendImage(originPort, strData) {
+    const objMessage = JSON.parse(strData)
+    const destination = objMessage.destination
     const imgFromClient = objMessage.data
-    fs.writeFileSync(`../../${destinationUsername}`, new Uint8Array(imgFromClient.data))
-    //const destinationClient = Object.values(clients).filter(e => e.username == destinationUsername)[0];
-}
+    const uIntData = new Uint8Array(imgFromClient.data)
 
-function toArrayBuffer(buffer) {
-    return new Uint8Array(buffer)
+    const client = rootGroup.clients[originPort]
+
+    const objData = {
+        from: client.username,
+        data: uIntData
+    }
+    const strSendData = JSON.stringify(objData)
+
+    const msgType = destination.charAt(0)
+    const msgTypes = {
+        '@': () => directMessage(originPort, destination.slice(1), strSendData),
+        // '$': () => sendGroupImage(originPort, destination.slice(1), strSendData),
+        // '*': () => sendImageToAll(originPort, strSendData)
+    }
+    msgTypes[msgType]()
 }
 
 function createGroup(clientPort, groupName) {
