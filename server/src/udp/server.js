@@ -65,14 +65,11 @@ function directMessage(originPort, destinationUsername, message) {
     let fullMessage = ''
     try {
         JSON.parse(message)
-        fullMessage = message
+        fullMessage = `[img] ${message}`
     } catch {
-        console.log('CAIU NO CATCH')
         fullMessage = `${originClient.username} [Privado]: ${message}`;
     }
 
-    console.log('CONTINUOU')
-        // const fullMessage = `${originClient.username} [Privado]: ${message}`;
     server.send(fullMessage, destinationClient.port, destinationClient.address);
 }
 
@@ -93,7 +90,14 @@ function sendMessage(originPort, destination, message) {
 
 function messageAll(originPort, message) {
     const client = rootGroup.clients[originPort];
-    const fullMessage = `${client.username} [Geral]: ${message}`;
+
+    let fullMessage = ''
+    try {
+        JSON.parse(message)
+        fullMessage = `[img] ${message}`
+    } catch {
+        fullMessage = `${client.username} [To everyone]: ${message}`;
+    }
 
     Object.values(rootGroup.clients)
         .filter(client => client.port != originPort)
@@ -103,24 +107,23 @@ function messageAll(originPort, message) {
 }
 
 function sendImage(originPort, strData) {
-    const objMessage = JSON.parse(strData)
-    const destination = objMessage.destination
-    const imgFromClient = objMessage.data
-    const uIntData = new Uint8Array(imgFromClient.data)
+    const arrMessage = JSON.parse(strData)
+    const imgFromClient = arrMessage[0]
+    const destination = arrMessage[1]
 
     const client = rootGroup.clients[originPort]
 
     const objData = {
         from: client.username,
-        data: uIntData
+        data: imgFromClient.data
     }
     const strSendData = JSON.stringify(objData)
 
     const msgType = destination.charAt(0)
     const msgTypes = {
         '@': () => directMessage(originPort, destination.slice(1), strSendData),
-        // '$': () => sendGroupImage(originPort, destination.slice(1), strSendData),
-        // '*': () => sendImageToAll(originPort, strSendData)
+        '$': () => groupMessage(originPort, destination.slice(1), strSendData),
+        '*': () => messageAll(originPort, strSendData)
     }
     msgTypes[msgType]()
 }
@@ -139,7 +142,14 @@ function createGroup(clientPort, groupName) {
 function groupMessage(originPort, groupName, message) {
     const group = groupManager.getGroupByName(groupName)
     const client = rootGroup.clients[originPort];
-    const fullMessage = `${client.username} [${groupName}]: ${message}`;
+
+    let fullMessage = ''
+    try {
+        JSON.parse(message)
+        fullMessage = `[img] ${message}`
+    } catch {
+        fullMessage = `${client.username} [${groupName}]: ${message}`;
+    }
 
     Object.values(group.clients)
         .filter(client => client.port != originPort)
