@@ -31,9 +31,12 @@ function keepAlive(){
 function createUserDir(){
     try {
         fs.mkdirSync("../../data")
-    } catch(err) {}
+    } catch(_) {}
 
-    fs.mkdirSync("../../data/" + clientUsername)
+    try {
+        fs.mkdirSync("../../data/" + clientUsername)
+    } catch(_) {
+    }
 }
 
 (async() => {
