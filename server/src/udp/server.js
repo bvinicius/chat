@@ -43,6 +43,7 @@ server.on("message", function (data, info) {
         group: () => createGroup(info.port, args[0]),
         join: () => joinGroup(info.port, args[0]),
         img: () => sendImage(info.port, args[0]),
+        listGroups: () => listGroups(info.port, info.address),
         ka: () => keepAlive(info.port)
     };
 
@@ -55,6 +56,15 @@ server.on("message", function (data, info) {
 function registerClient(username, port, address) {
     rootGroup.addClient(username, port, address);
     server.send(`[registered] ${username}`, port, address);
+}
+
+function listGroups(port, address) {
+    groups = groupManager.getAll();
+    retorno = "" 
+    groups.forEach(element => {
+        retorno += element.name + "\n"
+    });
+    server.send(`List of Groups: \n ${retorno}`, port, address);
 }
 
 function directMessage(originPort, destinationUsername, message) {

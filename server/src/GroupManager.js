@@ -6,6 +6,10 @@ class GroupManager {
             .filter(e => e.name == name)[0]
     }
 
+    getAll() {
+        return this.groups
+    }
+
     addGroup(group) {
         const alreadyExists = this.groups
             .map(e => e.name)

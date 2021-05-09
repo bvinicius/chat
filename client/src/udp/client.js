@@ -69,6 +69,7 @@ function showHelp() {
     console.log('- /msg: Send a message to everyone, a group or just one person\n\tTo message everyone: /msg * <message>\n\tTo message a group: /msg $<group> <message>\n\tTo message someone directly: /msg @<username> <message>\n\n\tExamples:\n\t/msg * Hello everyone!\n\t/msg $group1 Hello group1 members!\n\t/msg @joaozinho Hello joaozinho!\n')
     console.log('- /group: Create a new group\n\n\tExample: /group workGroup\n')
     console.log('- /join: Join an existent group. You only receive group messages from groups you joined.\n\n\tExample: /join workGroup\n')
+    console.log('- /listGroups: Lists the existent groups\n\n\tExample: /listGroups\n')
     console.log('- /img: Send a JPG (only!) image to everyone, a group or just one person\n\tTo send to everyone: /img * <img_path>\n\tTo send to a group: /img $<group> <img_path>\n\tTo send to someone directly: /img @<username> <img_path>\n\n\tExamples:\n\t/img * ../../image.jpg\n\t/img $group1 ../../image.jpg\n\t/img @joaozinho ../../image.jpg\n')
 }
 
