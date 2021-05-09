@@ -40,19 +40,37 @@ function createUserDir(){
 }
 
 (async() => {
+    greet()
     let answer = ''
     while(answer != 'quit') {
         answer = await question('> ')
 
-        const isImgSend = answer.indexOf('/img') === 0
-        if (isImgSend) {
-            const [destination, imgPath] = answer.split(' ').slice(1)
-            sendImage(destination, imgPath)
-        } else {
-            client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
+        const splitAnswer = answer.split(' ')
+        const cmd = splitAnswer[0].slice(1)
+        const preCommands = {
+            img: () => sendImage(splitAnswer.slice(1)[0], splitAnswer.slice(1)[1]),
+            help: () => showHelp()
         }
+
+        cmd in preCommands ?
+            preCommands[cmd]() :
+            client.send(answer, 0, answer.length, SERVER_PORT, SERVER_ADDRESS);
     }
 })()
+
+function greet() {
+    console.log('Hello!\n')
+    console.log('For more information about how to use this chat, type "/help"')
+}
+
+function showHelp() {
+    console.log('\nAvailable commands: \n')
+    console.log('- /register: Register yourself with your username\n\n\tExample: /register joaozinho\n')
+    console.log('- /msg: Send a message to everyone, a group or just one person\n\tTo message everyone: /msg * <message>\n\tTo message a group: /msg $<group> <message>\n\tTo message someone directly: /msg @<username> <message>\n\n\tExamples:\n\t/msg * Hello everyone!\n\t/msg $group1 Hello group1 members!\n\t/msg @joaozinho Hello joaozinho!\n')
+    console.log('- /group: Create a new group\n\n\tExample: /group workGroup\n')
+    console.log('- /join: Join an existent group. You only receive group messages from groups you joined.\n\n\tExample: /join workGroup\n')
+    console.log('- /img: Send a JPG (only!) image to everyone, a group or just one person\n\tTo send to everyone: /img * <img_path>\n\tTo send to a group: /img $<group> <img_path>\n\tTo send to someone directly: /img @<username> <img_path>\n\n\tExamples:\n\t/img * ../../image.jpg\n\t/img $group1 ../../image.jpg\n\t/img @joaozinho ../../image.jpg\n')
+}
 
 function sendImage(destination, imgPath) {
     const imageBuffer = fs.readFileSync(imgPath)

@@ -174,7 +174,7 @@ function checkUpdates() {
             const duration = now - client.lastUpdate
             if (duration > 20000) {
                 const removedClient = rootGroup.removeClient(client.port);
-                console.log(`${removedClient.username} foi desconectado por inatividade.`);
+                console.log(`${removedClient.username} has been disconnected.`);
             }
         });
     }, 1000);
